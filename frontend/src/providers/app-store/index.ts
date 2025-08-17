@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { chatStore } from '@/entities/chat-store';
+import { gameStore } from '@/entities/game-store';
 
 export const store = configureStore({
   reducer: {
     chat: chatStore.reducer,
+    game: gameStore.reducer,
   },
 });
 

@@ -1,8 +1,12 @@
+export const RoundDurationInMs = 120_000;
+export const GameMaxRounds = 3;
+export const UserPlayerId = '256';
+
 export const GameState = {
-  WaitingForStart: 'WaitingForStart',
-  AiPlayerTyping: 'AiPlayerTyping',
-  AiPlayerFinishedTyping: 'AiPlayerFinishedTyping',
+  Voting: 'Voting',
   GameOver: 'GameOver',
+  Discussion: 'Discussion',
+  WaitingForStart: 'WaitingForStart',
 } as const;
 
 export const PlayerStatus = {
@@ -33,6 +37,13 @@ export class ErrPlayerNotFound extends Error {
   constructor(playerId: string) {
     super(`Player is not in the game: ${playerId}`);
     this.name = 'PlayerNotFound';
+  }
+}
+
+export class ErrMaxRoundsReached extends Error {
+  constructor() {
+    super('Maximum number of rounds reached');
+    this.name = 'MaxRoundsReached';
   }
 }
 

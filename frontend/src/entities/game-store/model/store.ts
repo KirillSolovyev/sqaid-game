@@ -1,7 +1,16 @@
 import dayjs from 'dayjs';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { GameState, PlayerStatus, ErrRoundNotFound, ErrPlayerNotFound } from './config';
-import type { GameInitialState, Player } from './types';
+import {
+  GameMaxRounds,
+  GameState,
+  PlayerStatus,
+  ErrRoundNotFound,
+  ErrPlayerNotFound,
+  ErrMaxRoundsReached,
+  UserPlayerId,
+  RoundDurationInMs,
+} from '../config';
+import type { GameInitialState, GameStateType, Player } from '../types';
 
 const initialState: GameInitialState = {
   rounds: [],
@@ -11,16 +20,21 @@ const initialState: GameInitialState = {
   state: GameState.WaitingForStart,
 };
 
-type PlayerPayload = Omit<Player, 'status'>;
-type EliminatePlayerPayload = {
-  playerId: string;
-};
+type CreatePlayerPayload = Omit<Player, 'status'>;
+type UpdatePlayerPayload = Omit<Player, 'model' | 'model'>;
 type VotePayload = {
   playerId: string;
   voteForPlayerId: string;
 };
+type ChangeGameStatePayload = {
+  newState: GameStateType;
+};
 
-const startNewRound = (state: GameInitialState) => {
+const startNewRoundFn = (state: GameInitialState) => {
+  if (state.rounds.length >= GameMaxRounds) {
+    throw new ErrMaxRoundsReached();
+  }
+
   const playersVotes = state.players.reduce(
     (acc, player) => {
       acc[player.id] = '';
@@ -29,8 +43,10 @@ const startNewRound = (state: GameInitialState) => {
     {} as Record<string, string>,
   );
 
+  playersVotes[UserPlayerId] = '';
+
   const startTime = dayjs();
-  const endTime = startTime.add(60, 'seconds');
+  const endTime = startTime.add(RoundDurationInMs, 'milliseconds');
 
   const newRound = {
     id: startTime.unix().toString(),
@@ -46,29 +62,24 @@ export const gameStore = createSlice({
   name: 'game',
   initialState,
   reducers: {
-    startNewRound,
-    start: state => {
-      if (state.players.length < 1) {
-        throw new Error('Cannot start game without players');
-      }
-
-      state.state = GameState.AiPlayerTyping;
-      startNewRound(state);
+    startNewRound: startNewRoundFn,
+    setGameState: (state: GameInitialState, newState: PayloadAction<ChangeGameStatePayload>) => {
+      state.state = newState.payload.newState;
     },
-    addPlayer: (state, action: PayloadAction<PlayerPayload>) => {
+    addPlayer: (state, action: PayloadAction<CreatePlayerPayload>) => {
       state.players.push({
         ...action.payload,
         status: PlayerStatus.Active,
       });
     },
-    eliminatePlayer: (state, action: PayloadAction<EliminatePlayerPayload>) => {
-      const playerId = action.payload.playerId;
-      const playerToBeEliminated = state.players.find(player => player.id === playerId);
-      if (!playerToBeEliminated) {
+    updatePlayer: (state, action: PayloadAction<UpdatePlayerPayload>) => {
+      const playerId = action.payload.id;
+      const playerToUpdate = state.players.find(player => player.id === playerId);
+      if (!playerToUpdate) {
         throw new ErrPlayerNotFound(playerId);
       }
 
-      playerToBeEliminated.status = PlayerStatus.Eliminated;
+      Object.assign(playerToUpdate, action.payload);
     },
     vote: (state, action: PayloadAction<VotePayload>) => {
       const activeRound = state.rounds.find(round => round.id === state.currentRoundId);
@@ -85,3 +96,5 @@ export const gameStore = createSlice({
     },
   },
 });
+
+export const { vote, startNewRound, addPlayer } = gameStore.actions;
