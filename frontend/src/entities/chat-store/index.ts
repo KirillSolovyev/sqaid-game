@@ -2,7 +2,8 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 export const ChatMessageRole = {
   User: 'user',
-  Assistant: 'assistant',
+  Player: 'player',
+  System: 'system',
 } as const;
 
 export type ChatMessageRole = (typeof ChatMessageRole)[keyof typeof ChatMessageRole];
@@ -29,7 +30,13 @@ export const chatStore = createSlice({
     addMessage: (state, action: PayloadAction<ChatMessage>) => {
       state.messages.push(action.payload);
     },
+    updateMessage: (state, action: PayloadAction<{ id: string; text: string }>) => {
+      const message = state.messages.find(msg => msg.id === action.payload.id);
+      if (message) {
+        message.text = action.payload.text;
+      }
+    },
   },
 });
 
-export const { addMessage } = chatStore.actions;
+export const { addMessage, updateMessage } = chatStore.actions;
