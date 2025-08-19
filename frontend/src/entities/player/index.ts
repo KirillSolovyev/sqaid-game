@@ -1,5 +1,6 @@
-import { generateText, streamText } from 'ai';
+import { generateText, generateObject } from 'ai';
 import type { LanguageModel, CoreMessage, ToolSet } from 'ai';
+import type { ZodSchema } from 'zod';
 
 export class SqaidPlayer {
   name: string;
@@ -20,11 +21,11 @@ export class SqaidPlayer {
     });
   }
 
-  streamText(messages: CoreMessage[], tools?: ToolSet) {
-    return streamText({
+  generateObject(messages: CoreMessage[], schema: ZodSchema) {
+    return generateObject({
       model: this.model,
       messages: [...this.instructions, ...messages],
-      tools,
+      schema,
     });
   }
 }
