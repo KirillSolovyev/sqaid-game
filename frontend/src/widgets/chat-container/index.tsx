@@ -4,22 +4,23 @@ import { memo, useCallback } from 'react';
 import { Chat } from '@/features/chat';
 import { ChatBox } from '@/features/chat-box';
 import { addMessage, ChatMessageRole } from '@/entities/chat-store';
+import { UserPlayerId } from '@/entities/game-store';
 import { useAppDispatch, useAppSelector } from '@/shared/store';
 
 const MemoizedChatBox = memo(ChatBox);
 
 export const AppChat = () => {
-  const chatStore = useAppSelector(state => state.chat);
+  const chatMessages = useAppSelector(state => state.chat.messages);
   const dispatch = useAppDispatch();
 
-  const hasMessages = chatStore.messages.length > 0;
+  const hasMessages = chatMessages.length > 0;
 
   const onMessageSubmit = useCallback(
     (message: string) => {
       const newMessage = {
         id: Date.now().toString(),
         text: message,
-        userName: 'User',
+        userName: `Player ${UserPlayerId}`,
         role: ChatMessageRole.User,
       };
       dispatch(addMessage(newMessage));
