@@ -6,6 +6,7 @@ export const GameState = {
   Voting: 'Voting',
   GameOver: 'GameOver',
   Discussion: 'Discussion',
+  Elimination: 'Elimination',
   WaitingForStart: 'WaitingForStart',
 } as const;
 

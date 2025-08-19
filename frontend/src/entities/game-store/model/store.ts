@@ -97,4 +97,4 @@ export const gameStore = createSlice({
   },
 });
 
-export const { vote, startNewRound, addPlayer } = gameStore.actions;
+export const { vote, startNewRound, addPlayer, setGameState } = gameStore.actions;

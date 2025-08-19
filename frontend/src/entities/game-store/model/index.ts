@@ -1,2 +1,2 @@
-export { vote, addPlayer, startNewRound, gameStore } from './store';
+export { vote, addPlayer, startNewRound, setGameState, gameStore } from './store';
 export { start, finishGame, eliminatePlayer } from './thunks';
